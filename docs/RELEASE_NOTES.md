@@ -21,7 +21,7 @@ or macOS app bundle. Missing data is shown in-game.
 - Assets are decoded once at startup. Visible world geometry is culled and
   batched by texture; enemy pathfinding and visibility results are cached.
 - Keyboard, mouse and gamepad input share the runtime. See the
-  [controls](../README.md#controls).
+  [controls](SETUP.md#controls).
 - Three difficulty levels scale enemy health, damage and timing; see the
   [difficulty tables](DIFFICULTY_TABLES.md).
 - Death restarts the map with the starting weapons. Losing the last life
@@ -41,6 +41,6 @@ an interrupted write's temporary file is reused on the next attempt. This does
 not guarantee durability through power loss. Browser persistence also depends
 on successful IndexedDB sync. Failed loads preserve the active game state.
 
-The [test suite](../README.md#tests) covers parsers and, on native macOS/Linux,
+The [test suite](DEVELOPMENT.md#tests) covers parsers and, on native macOS/Linux,
 headless save/load and gameplay regressions. Platform builds and interactive
 play still need their own verification.
