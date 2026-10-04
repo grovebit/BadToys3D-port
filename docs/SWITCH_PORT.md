@@ -55,7 +55,7 @@ Saves are written to `sdmc:/switch/bt3d/`.
 
 ## Controls and implementation
 
-See the [Switch controls](../README.md#nintendo-switch) for the current bindings.
+See the [Switch controls](SETUP.md#nintendo-switch) for the current bindings.
 
 The shared runtime lives in `src/runtime.c`. Switch-specific input uses libnx
 in `src/input.c`; asset/save paths and window setup live in `src/platform.c`.

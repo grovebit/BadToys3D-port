@@ -1,139 +1,109 @@
 # Bad Toys 3D — raylib Port
 
-C11/raylib port of Bad Toys 3D (Tibo Software, 1995–1998) for macOS,
-Linux, Windows, Nintendo Switch and desktop browsers. Android is an
-[unfinished scaffold](docs/ANDROID_PORT_PLAN.md).
+A C11/raylib port of **Bad Toys 3D**, the first-person shooter by Tibo Software
+(1995–1998), for macOS, Linux, Windows, Nintendo Switch and web browsers.
 
-## Quick start
+## Why I made this
 
-On **macOS or Linux**, install the tools in the [setup guide](docs/SETUP.md),
-copy the original game's `data.pck` next to `build.sh`, then run:
+I played Bad Toys 3D as a child and have fond memories of it. The original
+was built for older 32-bit Windows systems and doesn't run natively on many
+modern devices. I started this port to revisit a childhood favourite and make
+it playable on a wider range of today's hardware.
+
+I chose [raylib](https://www.raylib.com/) for its lightweight design, simplicity
+and broad platform support. It provides a good foundation for bringing the
+game to different devices, though each platform still needs its own porting
+work and testing.
+
+## Bring your own assets
+
+**Game assets are not included. You must provide `data.pck` from your own
+original Bad Toys 3D installation.** It contains the levels, graphics and sounds.
+
+The demo's `data.pck` can also be used. This port loads the campaign levels
+present in the supplied pack without enforcing the original demo's level limit.
+**Please use this port only with a valid license for the original Bad Toys 3D.**
+Using demo assets does not grant a license to the full game.
+
+## Download and play — no compiling needed
+
+1. Open [Releases](https://github.com/grovebit/BadToys3D-port/releases) and download
+   the ZIP for your platform under **Assets**. Choose a platform ZIP, not the
+   **Source code** downloads.
+2. Extract the ZIP into a writable folder, such as a folder in your home directory.
+3. Copy your `data.pck` into the same folder as the game, then launch it:
+
+| Platform | Where to put `data.pck` | How to launch |
+| --- | --- | --- |
+| Windows | Beside `bt3d_raylib.exe` | Double-click the EXE. |
+| macOS | Beside `Bad Toys 3D.app`, **not inside it** | Open the app. |
+| Linux | Beside `bt3d_raylib` | Run `./bt3d_raylib` in a terminal. |
+| Nintendo Switch | Beside the NRO in `sdmc:/switch/bt3d/` | Launch through Homebrew Menu. |
+
+Keep the game and `data.pck` together. Desktop saves and settings are written
+in that same folder. You do not need CMake, raylib or Docker for these downloads.
+Each ZIP includes a `README.txt` with platform-specific instructions.
+
+For the **web download**, follow its `README.txt` to serve the extracted folder
+over HTTP. Put `data.pck` beside `index.html`, or choose/drop it on the page,
+then click **Start**. Opening `index.html` directly does not work.
+
+## Build from source — for developers
+
+Download or clone this repository, copy `data.pck` next to `build.sh`, then open
+a terminal in the project folder.
+
+### macOS / Linux
+
+Install the prerequisites in the [setup guide](docs/SETUP.md#2-install-the-tools-once),
+then run:
 
 ```bash
 ./build.sh --run
 ```
 
-This downloads raylib, builds the game, puts the data in place and starts it.
-Later runs reuse the build. You can also use
-`./build.sh --data "/path/to/data.pck" --run`. Omit `--run` to build only.
+This downloads raylib, builds the game, copies your assets and launches it.
+The first build needs internet access. Run the same command to play again.
+If your assets are elsewhere, use `./build.sh --data "/path/to/data.pck" --run`.
 
-On **Windows**, follow the [Docker setup steps](docs/SETUP.md#windows-build).
-The original game data is required on every platform and is not included here.
+### Windows
 
-## Platform builds
+Set up [Docker Desktop with WSL](docs/SETUP.md#windows-build), then run in your
+Ubuntu terminal:
 
 ```bash
-./build.sh --macos                # local macOS build and .app bundle
-./build.sh --win                  # Windows via Docker/Zig
-./build.sh --switch               # Switch via Docker/devkitPro
-./build.sh --web                  # browser via Docker/Emscripten
-./build.sh --win --switch --web   # all Docker targets, on any supported host
-./build.sh --release              # all four targets and dist/ staging; requires macOS
+./build.sh --win
 ```
 
-`--native` (the default) and `--macos` fetch raylib automatically. They require
-CMake, Git and the host compiler tools; see [setup](docs/SETUP.md). `--all` builds the same four targets as `--release`, without
-its final staging pass. Docker targets require Bash and a running Docker daemon.
+Open `build/windows/` in Windows Explorer and double-click `bt3d_raylib.exe`.
+The build copies your supplied `data.pck` beside it.
 
-| Target | Default output | Guide |
-| --- | --- | --- |
-| macOS app | `dist/macos/Bad Toys 3D.app` | [Distribution](docs/DIST_BUILD.md) |
-| Windows | `build/windows/bt3d_raylib.exe` | [Docker](docs/DOCKER_BUILD.md) |
-| Switch | `build/switch/bt3d_raylib_nx.nro` | [Switch](docs/SWITCH_PORT.md) |
-| Browser | `dist/web/index.html` and JS/WASM files | [Web](docs/WEB_BUILD.md) |
+### Web browser
 
-`build.sh` finds `data.pck` in the project folder, `../data.pck`,
-`../original/data.pck` or `romfs/data.pck`. Use `--data /path/to/data.pck`
-(or `DATA_PCK_SRC`) to select a file explicitly. Available data is copied beside
-native/Windows executables, packaged for Switch, and staged for Web.
-
-## Runtime files
-
-- **Desktop:** put `data.pck` beside the executable, or beside the macOS
-  `.app` bundle. Saves and `config.dat` are written in that same directory,
-  which must be writable.
-- **Switch:** the Docker build embeds the available pack in the `.nro`.
-  Without an embedded pack, place it in `sdmc:/switch/bt3d/`; saves also go there.
-- **Browser:** serve `dist/web/` over HTTP. The page loads a neighbouring
-  `data.pck`, or lets you choose/drop it, then enables **Start**. Saves and
-  config persist through IndexedDB.
+With Docker running and Python 3 installed:
 
 ```bash
+./build.sh --web
 cd dist/web
 python3 -m http.server 8000
 ```
 
-Open `http://127.0.0.1:8000/`; `file://` does not work.
-
-## Controls
-
-### Desktop
-- `WASD` or `↑` / `↓` — move forward/back; `A` / `D` strafe
-- `←` / `→` — turn (yaw)
-- Mouse — look
-- Left click or `Left Ctrl` — shoot
-- `E` / `Space` / right click — use/open
-- `1`–`4` — select weapon
-- `M` — map
-- `Esc` — menu
-- `F5` — save, `F9` — load
-- `Backspace` — delete the selected save (load menu)
-- Gamepad: the Switch buttons below, by position (noclip and profiler are keyboard-only)
-- Debug tools only: `[` / `]` cycle maps, `N` noclip, `F10` profiler, `C` copy debug text
+Open `http://localhost:8000/` and click **Start**. If you did not supply assets
+before building, choose or drop your `data.pck` on the page first.
 
 ### Nintendo Switch
-- Left stick / D-pad — move, and navigate menus
-- Right stick — look
-- ZR — fire
-- ZL / A — use / interact
-- L / R — cycle weapon
-- X — map
-- + — menu
-- A — confirm, B — back, Y — delete the selected save (menus)
-- Debug tools only: D-pad left/right cycle maps, Y noclip, − profiler
 
-## Manual build
+With Docker running, build with `./build.sh --switch`, then copy
+`build/switch/bt3d_raylib_nx.nro` to `sdmc:/switch/bt3d/` and launch it through
+Homebrew Menu. Your supplied assets are embedded during the build.
+See the [Switch guide](docs/SWITCH_PORT.md) for details.
 
-For an existing development environment (CMake 3.16+, C compiler and raylib):
+## Unofficial project
 
-```bash
-cmake -S . -B build/desktop
-cmake --build build/desktop --parallel
-cp /path/to/data.pck build/desktop/data.pck
-./build/desktop/bt3d_raylib
-```
+This is an independent fan project. It is not affiliated with, authorized by,
+endorsed by, or officially connected to Tibo Software. The official game website
+is [Bad Toys 3D by Tibo Software](https://www.tibosoftware.com/bad-toys.htm).
 
-Add `-DBT3D_FETCH_RAYLIB=ON` to configure to download raylib 5.5 instead of
-using an installed copy. Builds default to Release; use
-`-DCMAKE_BUILD_TYPE=Debug` for debugging. Optional menu music is embedded from
-`../original/m1.dat`; override with `-DBT3D_MIDI_SRC=/path/to/m1.dat`.
-
-## Tests
-
-```bash
-cmake -S . -B build/tests -DBT3D_BUILD_TESTS=ON
-cmake --build build/tests --parallel
-ctest --test-dir build/tests --output-on-failure
-```
-
-Build script checks (Python 3, no compiler or game data required):
-
-```bash
-python3 tests/test_build.py
-```
-
-The C tests use the same raylib prerequisites as a native build. Tests cover pack/map
-parsers; native macOS/Linux builds also include headless gameplay tests for
-save/load, failed writes and loads, cooldowns, death/restart and level transitions.
-
-## Documentation
-
-- [First-time setup](docs/SETUP.md) — install tools, add game data and play
-- [Distribution builds](docs/DIST_BUILD.md) — packaging and staging
-- [Docker builds](docs/DOCKER_BUILD.md) — images, options and troubleshooting
-- [Web build](docs/WEB_BUILD.md), [Switch build](docs/SWITCH_PORT.md), [direct Windows build](docs/WINDOWS_ZIG_BUILD.md)
-- [Code specification](docs/CODE_SPEC.md) — modules, runtime flow and save format
-- [Difficulty tables](docs/DIFFICULTY_TABLES.md) — enemy stats and weapon damage
-- [Release notes](docs/RELEASE_NOTES.md) — current behavior and limitations
-- [Changelog](docs/CHANGELOG.md) and [porting history](docs/PORTING_NOTES.md) — historical changes and decisions
-- [Android plan](docs/ANDROID_PORT_PLAN.md) and [cleanup backlog](docs/CLEANUP_PLAN.md)
+Bad Toys 3D, Tibo Software, and related names, logos, artwork and game assets
+belong to their respective owners. This port does not claim ownership of the
+original game or its assets.

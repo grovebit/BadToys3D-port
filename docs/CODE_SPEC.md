@@ -198,7 +198,7 @@ Opening the menu always starts on the main screen at the first item.
 
 `tests/` holds parser regression tests for `datpack.c` and `map242.c`, plus a
 headless gameplay/save harness on native macOS/Linux. Enable them with
-`-DBT3D_BUILD_TESTS=ON`; see the [test commands](../README.md#tests). Code that
+`-DBT3D_BUILD_TESTS=ON`; see the [test commands](DEVELOPMENT.md#tests). Code that
 is only for desktop builds is guarded by `BT3D_PLATFORM_SWITCH`, `_WEB` and `_ANDROID`.
 `android/` is the Gradle scaffold for the Android port; see
 [the Android plan](ANDROID_PORT_PLAN.md).

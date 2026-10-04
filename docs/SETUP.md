@@ -112,5 +112,32 @@ needed. See the [Docker guide](DOCKER_BUILD.md) for staging and custom paths.
   SSH session; omit `--run` for build-only use.
 
 For macOS app bundles, Switch or browser builds, see the
-[platform build guide](../README.md#platform-builds). For manual CMake builds,
-use the [developer commands](../README.md#manual-build).
+[distribution guide](DIST_BUILD.md). For manual CMake builds,
+use the [developer commands](DEVELOPMENT.md#manual-build).
+
+## Controls
+
+### Desktop
+- `WASD` or `↑` / `↓` — move forward/back; `A` / `D` strafe
+- `←` / `→` — turn (yaw)
+- Mouse — look
+- Left click or `Left Ctrl` — shoot
+- `E` / `Space` / right click — use/open
+- `1`–`4` — select weapon
+- `M` — map
+- `Esc` — menu
+- `F5` — save, `F9` — load
+- `Backspace` — delete the selected save (load menu)
+- Gamepad: the Switch buttons below, by position (noclip and profiler are keyboard-only)
+- Debug tools only: `[` / `]` cycle maps, `N` noclip, `F10` profiler, `C` copy debug text
+
+### Nintendo Switch
+- Left stick / D-pad — move, and navigate menus
+- Right stick — look
+- ZR — fire
+- ZL / A — use / interact
+- L / R — cycle weapon
+- X — map
+- + — menu
+- A — confirm, B — back, Y — delete the selected save (menus)
+- Debug tools only: D-pad left/right cycle maps, Y noclip, − profiler
