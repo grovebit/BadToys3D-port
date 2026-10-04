@@ -134,6 +134,7 @@
           <input id="data-file" type="file" accept=".pck,application/octet-stream">
         </div>
         <button id="start-button" type="button">Start</button>
+        <p>Start opens fullscreen when supported. During play, click the game to capture the mouse. Press Esc to release it.</p>
         <div id="status">Loading web runtime...</div>
       </div>
     </div>
@@ -144,6 +145,9 @@
         printErr: function(text) { console.error(text); },
         setStatus: function(text) {
           var status = document.getElementById("status");
+          if (window.location.protocol === "file:") {
+            text = "This game needs a local web server. In this folder, run: python3 -m http.server 8000, then open http://localhost:8000/ in your browser.";
+          }
           if (status) status.textContent = text || "";
         }
       };
@@ -158,7 +162,7 @@
       var manualControls = document.getElementById("manual-controls");
 
       function updateStartState() {
-        startButton.disabled = !(runtimeReady && selectedData);
+        startButton.disabled = window.location.protocol === "file:" || !(runtimeReady && selectedData);
         if (!runtimeReady) {
           Module.setStatus("Loading web runtime...");
         } else if (autoLoadPending) {
@@ -240,6 +244,18 @@
       });
 
       startButton.disabled = true;
+      Module.canvas.addEventListener("mousedown", function() {
+        Module.canvas.focus();
+        if (!Module.mouseCaptureWanted || document.pointerLockElement === Module.canvas ||
+            !Module.canvas.requestPointerLock) return;
+        try {
+          var request = Module.canvas.requestPointerLock();
+          if (request) request.catch(function(error) { console.log("bt3d: mouse capture unavailable", error); });
+        } catch (error) {
+          console.log("bt3d: mouse capture unavailable", error);
+        }
+      });
+
       startButton.addEventListener("click", function() {
         var overlay = document.getElementById("overlay");
         if (!runtimeReady || !selectedData) return;
@@ -247,6 +263,17 @@
         Module.FS.writeFile("/data.pck", selectedData);
         selectedData = null;
         if (overlay) overlay.style.display = "none";
+        Module.canvas.focus();
+        // Request within the Start gesture, before the runtime enters its main loop.
+        var stage = document.getElementById("stage");
+        if (stage.requestFullscreen) {
+          try {
+            var request = stage.requestFullscreen();
+            if (request) request.catch(function(error) { console.log("bt3d: fullscreen unavailable", error); });
+          } catch (error) {
+            console.log("bt3d: fullscreen unavailable", error);
+          }
+        }
         Module.callMain([]);
       });
 

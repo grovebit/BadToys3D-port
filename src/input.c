@@ -5,6 +5,10 @@
 
 #include <math.h>
 
+#if BT3D_PLATFORM_WEB
+#include <emscripten/emscripten.h>
+#endif
+
 #if BT3D_PLATFORM_SWITCH
 #include <switch.h>
 #endif
@@ -108,6 +112,10 @@ int bt3d_active_gamepad_index(void) {
 
 void set_mouse_capture(AppState *app, int captured) {
     app->control.mouse_captured = captured;
+#if BT3D_PLATFORM_WEB
+    /* The shell retries capture on a click when the browser requires a gesture. */
+    EM_ASM({ Module['mouseCaptureWanted'] = !!$0; }, captured);
+#endif
     if (captured) {
         DisableCursor();
     } else {

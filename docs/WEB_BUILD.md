@@ -37,6 +37,11 @@ Then open `http://127.0.0.1:8000/`. If `data.pck` is next to `index.html`,
 the shell loads it automatically; otherwise choose or drop the original
 `data.pck`. Click Start after the pack is ready. Do not use `file://`.
 
+Start requests fullscreen; if the browser declines, the game runs in the page.
+During play, click the game to capture the mouse for turning. Press Esc to
+release the mouse or leave fullscreen; click the game to capture it again
+after resuming from the menu.
+
 The web main loop uses `requestAnimationFrame`; presentation rate depends on
 the browser, OS and display refresh rate.
 
