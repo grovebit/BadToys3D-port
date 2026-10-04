@@ -27,7 +27,9 @@ case "$target" in
             /usr/libexec/PlistBuddy -c 'Set :LSMinimumSystemVersion 11.0' 'dist/macos/Bad Toys 3D.app/Contents/Info.plist'
             codesign --force --deep --sign - 'dist/macos/Bad Toys 3D.app'
             codesign --verify --deep --strict 'dist/macos/Bad Toys 3D.app'
-            lipo -verify_arch arm64 x86_64 build/ci/bt3d_raylib
+            for arch in arm64 x86_64; do
+                lipo build/ci/bt3d_raylib -verify_arch "$arch"
+            done
             package macos-universal build/ci/_deps/raylib-src
         else
             package linux-x86_64 build/ci/_deps/raylib-src
