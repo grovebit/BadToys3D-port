@@ -34,7 +34,7 @@ function(bt3d_configure_switch_packaging target_name)
         COMMENT "Generating NACP metadata"
     )
 
-    if (EXISTS ${ROMFS_DIR})
+    if (BT3D_EMBED_ROMFS AND EXISTS ${ROMFS_DIR})
         set(ROMFS_ARGS --romfsdir=${ROMFS_DIR})
         file(GLOB ROMFS_FILES ${ROMFS_DIR}/*)
         set(NRO_COMMENT "Packaging .nro with romfs")

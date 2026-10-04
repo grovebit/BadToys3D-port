@@ -15,6 +15,7 @@ option(BT3D_PLATFORM_ANDROID "Build for Android through raylib/NDK" OFF)
 option(BT3D_STATIC_RAYLIB "Statically link raylib for a portable single-file desktop binary" OFF)
 option(BT3D_FETCH_RAYLIB "Fetch and build raylib automatically during configure" OFF)
 option(BT3D_BUILD_TESTS "Build focused regression tests" OFF)
+option(BT3D_EMBED_ROMFS "Embed the romfs directory in Switch builds" ON)
 
 include(cmake/sources.cmake)
 include(cmake/desktop.cmake)
