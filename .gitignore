@@ -1,0 +1,33 @@
+# Build output
+build/
+build-*/
+cmake-build-*/
+dist/
+dist-*/
+android/.gradle/
+android/build/
+android/app/build/
+*.o
+*.obj
+*.exe
+*.elf
+*.nro
+*.nacp
+*.dSYM/
+bt3d_raylib
+bt3d_raylib_nx
+
+# Runtime files
+savegame.dat
+save-*.dat
+config.dat
+debug.log
+*.pprof
+
+# Assets (embedded in romfs at build time)
+/data.pck
+romfs/data.pck
+
+# OS junk
+.DS_Store
+**/.DS_Store

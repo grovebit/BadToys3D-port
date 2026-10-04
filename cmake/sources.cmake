@@ -1,0 +1,57 @@
+set(BT3D_CORE_SOURCES
+    src/main.c
+    src/campaign.c
+    src/input.c
+    src/platform.c
+    src/file_io.c
+    src/runtime.c
+    src/world_markers.c
+    src/world_overlays.c
+    src/world_spawn.c
+    src/world_tiles.c
+    src/session.c
+    src/savegame.c
+    src/save_slots.c
+)
+
+set(BT3D_GAMEPLAY_SOURCES
+    src/combat.c
+    src/doors.c
+    src/enemies.c
+    src/enemy_ai.c
+    src/pickups.c
+    src/player.c
+    src/player_flow.c
+    src/player_interact.c
+    src/player_movement.c
+    src/player_weapons.c
+    src/visibility.c
+    src/weapons.c
+)
+
+set(BT3D_RENDER_SOURCES
+    src/frame.c
+    src/map_overlay.c
+    src/menu.c
+    src/menu_draw.c
+    src/render_billboards.c
+    src/render_ui.c
+    src/render_world.c
+)
+
+set(BT3D_DATA_AUDIO_SOURCES
+    src/audio.c
+    src/assets.c
+    src/datpack.c
+    src/debug_tools.c
+    src/map242.c
+    src/midi_player.c
+    src/profiler.c
+)
+
+set(BT3D_SOURCES
+    ${BT3D_CORE_SOURCES}
+    ${BT3D_GAMEPLAY_SOURCES}
+    ${BT3D_RENDER_SOURCES}
+    ${BT3D_DATA_AUDIO_SOURCES}
+)

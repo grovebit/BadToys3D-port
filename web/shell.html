@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bad Toys 3D</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #0b0d10;
+        color: #f2e7c8;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      #stage {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #0b0d10;
+      }
+
+      canvas.emscripten {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+        border: 0;
+        outline: 0;
+        background: #000;
+      }
+
+      #overlay {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: rgba(7, 9, 12, 0.92);
+        z-index: 2;
+      }
+
+      #start-panel {
+        width: min(420px, calc(100vw - 40px));
+        padding: 24px;
+        border: 1px solid rgba(242, 231, 200, 0.22);
+        background: rgba(16, 18, 22, 0.96);
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      p {
+        margin: 0 0 18px;
+        color: #c7baa0;
+        line-height: 1.45;
+      }
+
+      button,
+      .file-label {
+        width: 100%;
+        min-height: 44px;
+        border: 0;
+        background: #d8a42e;
+        color: #1f1707;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .file-label {
+        display: grid;
+        place-items: center;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+        background: #29313b;
+        color: #f2e7c8;
+      }
+
+      button:disabled {
+        cursor: default;
+        opacity: 0.65;
+      }
+
+      #drop-zone {
+        margin: 0 0 12px;
+        padding: 18px;
+        border: 1px dashed rgba(242, 231, 200, 0.35);
+        background: rgba(255, 255, 255, 0.03);
+        color: #c7baa0;
+        text-align: center;
+      }
+
+      #drop-zone.dragging {
+        border-color: #d8a42e;
+        color: #f2e7c8;
+      }
+
+      #data-file {
+        display: none;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #status {
+        min-height: 20px;
+        margin-top: 14px;
+        color: #9fa8b4;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    </div>
+    <div id="overlay">
+      <div id="start-panel">
+        <h1>Bad Toys 3D</h1>
+        <p>Loading the original Bad Toys 3D data.pck from this folder. Saves and options are stored in this browser.</p>
+        <div id="manual-controls" class="hidden">
+          <div id="drop-zone">Drop data.pck here</div>
+          <label class="file-label" for="data-file">Choose data.pck</label>
+          <input id="data-file" type="file" accept=".pck,application/octet-stream">
+        </div>
+        <button id="start-button" type="button">Start</button>
+        <div id="status">Loading web runtime...</div>
+      </div>
+    </div>
+    <script>
+      var Module = {
+        canvas: document.getElementById("canvas"),
+        print: function(text) { console.log(text); },
+        printErr: function(text) { console.error(text); },
+        setStatus: function(text) {
+          var status = document.getElementById("status");
+          if (status) status.textContent = text || "";
+        }
+      };
+
+      var runtimeReady = false;
+      var autoLoadPending = true;
+      var selectedData = null;
+      var selectedName = "";
+      var startButton = document.getElementById("start-button");
+      var fileInput = document.getElementById("data-file");
+      var dropZone = document.getElementById("drop-zone");
+      var manualControls = document.getElementById("manual-controls");
+
+      function updateStartState() {
+        startButton.disabled = !(runtimeReady && selectedData);
+        if (!runtimeReady) {
+          Module.setStatus("Loading web runtime...");
+        } else if (autoLoadPending) {
+          Module.setStatus("Checking for data.pck next to this page...");
+        } else if (!selectedData) {
+          Module.setStatus("Select data.pck to start.");
+        } else {
+          Module.setStatus("Ready: " + selectedName);
+        }
+      }
+
+      function showManualControls() {
+        if (manualControls) manualControls.classList.remove("hidden");
+      }
+
+      function setSelectedData(name, buffer) {
+        selectedName = name || "data.pck";
+        selectedData = new Uint8Array(buffer);
+        updateStartState();
+      }
+
+      function fallBackToFilePicker() {
+        autoLoadPending = false;
+        selectedData = null;
+        selectedName = "";
+        showManualControls();
+        updateStartState();
+      }
+
+      function tryLoadAdjacentDataPack() {
+        if (!window.fetch) {
+          fallBackToFilePicker();
+          return;
+        }
+        fetch("data.pck").then(function(response) {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.arrayBuffer();
+        }).then(function(buffer) {
+          autoLoadPending = false;
+          setSelectedData("data.pck", buffer);
+        }).catch(function(error) {
+          console.log("bt3d: no adjacent data.pck, showing file picker", error);
+          fallBackToFilePicker();
+        });
+      }
+
+      function useFile(file) {
+        if (!file) return;
+        selectedName = file.name || "data.pck";
+        Module.setStatus("Reading " + selectedName + "...");
+        file.arrayBuffer().then(function(buffer) {
+          setSelectedData(selectedName, buffer);
+        }).catch(function(error) {
+          console.error(error);
+          selectedData = null;
+          selectedName = "";
+          Module.setStatus("Could not read selected file.");
+          updateStartState();
+        });
+      }
+
+      fileInput.addEventListener("change", function(event) {
+        useFile(event.target.files && event.target.files[0]);
+      });
+
+      dropZone.addEventListener("dragover", function(event) {
+        event.preventDefault();
+        dropZone.classList.add("dragging");
+      });
+
+      dropZone.addEventListener("dragleave", function() {
+        dropZone.classList.remove("dragging");
+      });
+
+      dropZone.addEventListener("drop", function(event) {
+        event.preventDefault();
+        dropZone.classList.remove("dragging");
+        useFile(event.dataTransfer.files && event.dataTransfer.files[0]);
+      });
+
+      startButton.disabled = true;
+      startButton.addEventListener("click", function() {
+        var overlay = document.getElementById("overlay");
+        if (!runtimeReady || !selectedData) return;
+        startButton.disabled = true;
+        Module.FS.writeFile("/data.pck", selectedData);
+        selectedData = null;
+        if (overlay) overlay.style.display = "none";
+        Module.callMain([]);
+      });
+
+      Module.onRuntimeInitialized = function() {
+        runtimeReady = true;
+        updateStartState();
+      };
+
+      updateStartState();
+      tryLoadAdjacentDataPack();
+    </script>
+    {{{ SCRIPT }}}
+  </body>
+</html>
