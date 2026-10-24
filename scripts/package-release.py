@@ -32,7 +32,13 @@ INSTRUCTIONS = {
 3. Open Bad Toys 3D.app.
 Saves and config.dat are stored beside the app. Keep the app and pack together.
 The app is ad-hoc signed, not Apple-notarized. macOS may require you to approve
-opening it in System Settings > Privacy & Security.
+opening it in System Settings > Privacy & Security. If macOS asks to let the
+game access files in its folder, such as Downloads or an external drive, click
+Allow so it can read data.pck.
+If the game still says data.pck is missing and shows a folder containing
+AppTranslocation, open Terminal, type "xattr -dr com.apple.quarantine " (with
+the final space), drag Bad Toys 3D.app onto the window, press Return and open
+the app again.
 """,
     'windows-x86_64': """WINDOWS (64-bit; Windows 10/11 recommended)
 1. Extract the ZIP into a writable folder.

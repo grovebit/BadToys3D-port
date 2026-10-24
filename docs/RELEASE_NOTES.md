@@ -14,7 +14,8 @@ For earlier changes, see the [changelog](CHANGELOG.md).
 
 Supply the original `data.pck`. Scripts copy it into distribution directories
 when available; it is not tracked in Git. Desktop loads it beside the executable
-or macOS app bundle. Missing data is shown in-game.
+or macOS app bundle, including when macOS runs a downloaded app from a temporary
+copy (App Translocation). Missing data is shown in-game.
 
 ## Runtime and gameplay
 

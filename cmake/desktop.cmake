@@ -1,6 +1,6 @@
 function(bt3d_configure_desktop_target target_name)
     if (APPLE)
-        target_link_libraries(${target_name} PRIVATE "-framework IOKit" "-framework Cocoa" "-framework OpenGL")
+        target_link_libraries(${target_name} PRIVATE "-framework IOKit" "-framework Cocoa" "-framework OpenGL" "-framework CoreFoundation")
     elseif (WIN32)
         target_link_libraries(${target_name} PRIVATE opengl32 gdi32 winmm)
         if (MINGW)

@@ -14,6 +14,13 @@
 #include <emscripten/emscripten.h>
 #endif
 
+#if defined(__APPLE__)
+#include <CoreFoundation/CoreFoundation.h>
+#include <dlfcn.h>
+#include <limits.h>
+#include <stdbool.h>
+#endif
+
 #if BT3D_PLATFORM_SWITCH
 #define SAVE_DIRECTORY "sdmc:/switch/bt3d"
 static const char *const data_pack_candidates[] = { "romfs:/data.pck", SAVE_DIRECTORY "/data.pck", "data.pck" };
@@ -94,6 +101,42 @@ int bt3d_open_data_pack(DatPack *pack) {
     return 0;
 }
 
+#if defined(__APPLE__)
+typedef Boolean (*IsTranslocatedUrlFn)(CFURLRef, bool *, CFErrorRef *);
+typedef CFURLRef (*CreateOriginalPathFn)(CFURLRef, CFErrorRef *);
+
+/* A downloaded app opened from Finder runs from a read-only copy in a random
+   folder (App Translocation), away from data.pck. Security.framework maps the
+   copy back to the original, but only through functions missing from the SDK
+   headers, so they are looked up at runtime. Returns 0 if not translocated or
+   the lookup fails. */
+static int find_untranslocated_path(const char *path, char *out_path, size_t out_path_size) {
+    void *security = dlopen("/System/Library/Frameworks/Security.framework/Security", RTLD_LAZY);
+    IsTranslocatedUrlFn is_translocated_url;
+    CreateOriginalPathFn create_original_path;
+    CFURLRef url;
+    CFURLRef original = NULL;
+    bool translocated = false;
+    int found = 0;
+
+    if (!security) return 0;
+    is_translocated_url = (IsTranslocatedUrlFn)dlsym(security, "SecTranslocateIsTranslocatedURL");
+    create_original_path = (CreateOriginalPathFn)dlsym(security, "SecTranslocateCreateOriginalPathForURL");
+    url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, (CFIndex)strlen(path), true);
+    if (url && is_translocated_url && create_original_path
+        && is_translocated_url(url, &translocated, NULL) && translocated) {
+        original = create_original_path(url, NULL);
+    }
+    if (original) {
+        found = CFURLGetFileSystemRepresentation(original, true, (UInt8 *)out_path, (CFIndex)out_path_size);
+        CFRelease(original);
+    }
+    if (url) CFRelease(url);
+    dlclose(security);
+    return found;
+}
+#endif
+
 /* Desktop builds keep data.pck and the saves next to the executable, or
    next to the .app bundle on macOS. */
 void bt3d_enter_game_directory(void) {
@@ -104,6 +147,10 @@ void bt3d_enter_game_directory(void) {
 
     ChangeDirectory(exe_dir);
     if (length >= sizeof(bundle_suffix) - 1 && strcmp(exe_dir + length - (sizeof(bundle_suffix) - 1), bundle_suffix) == 0) {
+#if defined(__APPLE__)
+        char original_dir[PATH_MAX];
+        if (find_untranslocated_path(exe_dir, original_dir, sizeof(original_dir))) ChangeDirectory(original_dir);
+#endif
         ChangeDirectory("../../..");
     }
 #endif
