@@ -53,7 +53,7 @@ cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
     <key>CFBundleIconFile</key>
     <string>bt3d</string>
     <key>CFBundleIdentifier</key>
-    <string>com.tibosoftware.bt3d</string>
+    <string>io.github.grovebit.badtoys3d-port</string>
     <key>CFBundleName</key>
     <string>Bad Toys 3D</string>
     <key>CFBundleDisplayName</key>

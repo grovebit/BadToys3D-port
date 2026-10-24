@@ -25,6 +25,13 @@ case "$target" in
         if [ "$target" = macos ]; then
             BUILD_DIR=build/ci DATA_PCK_SRC=/nonexistent/data.pck bash scripts/package-mac-app.sh
             /usr/libexec/PlistBuddy -c 'Set :LSMinimumSystemVersion 11.0' 'dist/macos/Bad Toys 3D.app/Contents/Info.plist'
+            if [[ $version == v* ]]; then
+                # Bundle versions are numeric only: v0.2.0-rc.1 becomes 0.2.0.
+                app_version=${version#v}
+                for key in CFBundleShortVersionString CFBundleVersion; do
+                    /usr/libexec/PlistBuddy -c "Set :$key ${app_version%%-*}" 'dist/macos/Bad Toys 3D.app/Contents/Info.plist'
+                done
+            fi
             codesign --force --deep --sign - 'dist/macos/Bad Toys 3D.app'
             codesign --verify --deep --strict 'dist/macos/Bad Toys 3D.app'
             for arch in arm64 x86_64; do
